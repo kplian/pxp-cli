@@ -1,6 +1,8 @@
 const meow = require('meow');
 const cliPxp = require('./');
 
+cliPxp.main();
+
 const cli = meow(`
 	Usage
 	  $ cli-pxp

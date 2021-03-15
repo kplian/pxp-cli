@@ -1,6 +1,6 @@
 {
   "name": "cli-pxp",
-  "version": "1.0.7",
+  "version": "1.0.9",
   "description": "Generator for pxp-ui and pxp-nd",
   "main": "index.js",
   "scripts": {
