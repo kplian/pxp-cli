@@ -93,31 +93,62 @@ const writeColumns = (stream, columns) => {
   });
 };
 
-const createModel = (model, dir, columns = {}) => {
+
+const promptReplace = async () => {
+  const rpcl = await prompts([
+    {
+      type: 'toggle',
+      name: 'replace',
+      message: 'The entity already exists. Do you want to replace the file?',
+      initial: false,
+      active: 'yes',
+      inactive: 'no'
+    }
+  ]);
+  return rpcl.replace;
+};
+
+const createModel = async (model, dir, columns = {}) => {
   const modelOrm = model.charAt(0).toUpperCase() + _.camelCase(model.slice(1));
 
   const fileDir = dir + '/' + modelOrm + '.ts';
-  const stream = fs.createWriteStream(fileDir);
-  return new Promise((resolve, reject) => {
-    stream.once('open', (fd) => {
-      stream.write("import {\n");
-      stream.write("\tOneToMany,\n");
-      stream.write("\tJoinColumn,\n");
-      stream.write("\tManyToOne,\n");
-      stream.write("\tBaseEntity,\n");
-      stream.write("\tEntity,\n");
-      stream.write("\tPrimaryGeneratedColumn,\n");
-      stream.write("\tColumn\n");
-      stream.write("} from 'typeorm';\n");
-      stream.write("\n");
-      stream.write("@Entity({ name: '" + model + "' })\n");
-      stream.write("export default class " + modelOrm + " extends BaseEntity {\n");
-      writeColumns(stream, columns);
-      stream.write("}\n");
-      stream.end();
+
+
+  function write() {
+    const stream = fs.createWriteStream(fileDir);
+    return new Promise((resolve, reject) => {
+      stream.once('open', (fd) => {
+        stream.write("import {\n");
+        stream.write("\tOneToMany,\n");
+        stream.write("\tJoinColumn,\n");
+        stream.write("\tManyToOne,\n");
+        stream.write("\tBaseEntity,\n");
+        stream.write("\tEntity,\n");
+        stream.write("\tPrimaryGeneratedColumn,\n");
+        stream.write("\tColumn\n");
+        stream.write("} from 'typeorm';\n");
+        stream.write("\n");
+        stream.write("@Entity({ name: '" + model + "' })\n");
+        stream.write("export default class " + modelOrm + " extends BaseEntity {\n");
+        writeColumns(stream, columns);
+        stream.write("}\n");
+        stream.end();
+      });
+      stream.on('finish', resolve);
     });
-    stream.on('finish', resolve);
-  });
+  }
+
+  if (fs.existsSync(fileDir)) {
+    const replace = await promptReplace();
+    if (replace) {
+      write();
+    } else {
+      console.log(chalk.yellowBright('Thanks for using PXP-GENERATOR...!!!'));
+      process.exit();
+    }
+  } else {
+    write();
+  }
 };
 
 
