@@ -24,12 +24,13 @@ const connect = async () => {
     const db = await promptData(connections);
 
     if (!db.dataBase) throw 'Thanks for using PXP-GENERATOR...!!!';
-    
+
     const currentDb = _.find(connections, { name: db.dataBase });
-    const connnection = getConnection(db.dataBase);
+    const connection = getConnection(db.dataBase);
     const database = currentDb.options.database;
-    return { connnection, database, currentDb };
-  } catch(e) {
+    const type = currentDb.options.type;
+    return { connection, database, currentDb, type };
+  } catch (e) {
     console.log(chalk.red(e));
     process.exit(1);
   }

@@ -1,43 +1,43 @@
 const prompts = require('prompts');
 const chalk = require('chalk');
-const path = require('path');
 const fs = require('fs');
+const path = require('path');
 const _ = require('lodash');
 
-const promptTable = async (connnection, database) => {
-  const tables = await connnection.query("SELECT TABLE_NAME AS name FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ?", [database]);
-  return await prompts([
+const promptReplace = async () => {
+  const rpcl = await prompts([
     {
-      type: 'autocomplete',
-      name: 'name',
-      message: 'Select table:',
-      choices: tables.map((table) => ({
-        title: table.name,
-        value: table.name,
-      }))
+      type: 'toggle',
+      name: 'replace',
+      message: 'The entity already exists. Do you want to replace the file?',
+      initial: false,
+      active: 'yes',
+      inactive: 'no'
     }
   ]);
+  return rpcl.replace;
 };
 
-const columnsBuilder = async (connnection, database, table) => {
-  const columns = await connnection
-    .query("SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? ", [database, table]);
-  const columnsBuild = {};
-
-  columns.forEach((column) => {
-    const nameOrm = _.camelCase(column.COLUMN_NAME);
-    columnsBuild[nameOrm] = {
-      primary: column.COLUMN_KEY === 'PRI' ? true : null,
-      name: column.COLUMN_NAME === nameOrm ? null : column.COLUMN_NAME,
-      type: column.DATA_TYPE,
-      nullable: column.IS_NULLABLE === 'NO' ? false : null,
-      length: column.CHARACTER_MAXIMUM_LENGTH,
-      default: column.COLUMN_DEFAULT,
-    };
+const writeColumnsEntity = (stream, columns) => {
+  const colNameRender = (name) => {
+    return name === false || name === true || !isNaN(name) ? name : "'" + _.snakeCase(name) + "'";
+  };
+  columns.forEach(column => {
+    stream.write("\n");
+    if (column.isId) {
+      stream.write("\t@PrimaryGeneratedColumn({ name: '" + column.name + "' })\n");
+    }
+    else {
+      const keysCol = Object.keys(_.omit(column, ['isId']));
+      console.log('[keysCol]', keysCol);
+      stream.write("\t@Column({" +
+        keysCol.map((keyCol, i) => " " + keyCol + ": " + colNameRender(column[keyCol])) +
+        " })" +
+        "\n");
+    }
+    stream.write("\t" + column.name + ": " + column.type + ";\n");
   });
-  return columnsBuild;
 };
-
 
 const writeColumns = (stream, columns) => {
   const renderType = (type) => {
@@ -66,6 +66,7 @@ const writeColumns = (stream, columns) => {
       case 'text':
       case 'enum':
       case 'longtext':
+      case 'character varying':
         return 'string';
       default:
         return type;
@@ -76,6 +77,7 @@ const writeColumns = (stream, columns) => {
     return name === false || name === true || !isNaN(name) ? name : "'" + name + "'";
   };
   const keys = Object.keys(columns);
+  console.log('[cols]', columns);
   keys.forEach(key => {
     const col = _.omitBy(columns[key], _.isNull);
     const keysCol = Object.keys(col);
@@ -93,22 +95,7 @@ const writeColumns = (stream, columns) => {
   });
 };
 
-
-const promptReplace = async () => {
-  const rpcl = await prompts([
-    {
-      type: 'toggle',
-      name: 'replace',
-      message: 'The entity already exists. Do you want to replace the file?',
-      initial: false,
-      active: 'yes',
-      inactive: 'no'
-    }
-  ]);
-  return rpcl.replace;
-};
-
-const createModel = async (model, dir, columns = {}) => {
+const createModel = async (model, dir, columns = {}, isPxpEntity = false, isEntity = false) => {
   const modelOrm = model.charAt(0).toUpperCase() + _.camelCase(model.slice(1));
 
   const fileDir = dir + '/' + modelOrm + '.ts';
@@ -128,9 +115,17 @@ const createModel = async (model, dir, columns = {}) => {
         stream.write("\tColumn\n");
         stream.write("} from 'typeorm';\n");
         stream.write("\n");
-        stream.write("@Entity({ name: '" + model + "' })\n");
-        stream.write("export default class " + modelOrm + " extends BaseEntity {\n");
-        writeColumns(stream, columns);
+        stream.write("@Entity({ name: '" + _.snakeCase(model) + "' })\n");
+        if (isPxpEntity) {
+          stream.write("export default class " + modelOrm + " extends BaseEntity {\n");
+        } else {
+          stream.write("export default class " + modelOrm + " {\n");
+        }
+        if (!isEntity) {
+          writeColumns(stream, columns);
+        } else {
+          writeColumnsEntity(stream, columns);
+        }
         stream.write("}\n");
         stream.end();
       });
@@ -141,27 +136,18 @@ const createModel = async (model, dir, columns = {}) => {
   if (fs.existsSync(fileDir)) {
     const replace = await promptReplace();
     if (replace) {
-      write();
+      await write();
+      console.log(chalk.greenBright('Model created correctly in: ', dir));
     } else {
       console.log(chalk.yellowBright('Thanks for using PXP-GENERATOR...!!!'));
       process.exit();
     }
   } else {
-    write();
+    await write();
   }
 };
 
-
-const moduleCreate = async (connnection, database) => {
-
-  const table = await promptTable(connnection, database);
-  if (!table.name) {
-    console.log(chalk.yellowBright('Thanks for using PXP-GENERATOR...!!!'));
-    process.exit();
-  }
-
-  const columns = await columnsBuilder(connnection, database, table.name);
-
+const verifyDirEntity = async () => {
   const data = await prompts([
     {
       type: 'text',
@@ -179,8 +165,7 @@ const moduleCreate = async (connnection, database) => {
   const dir = path.join(process.cwd(), 'src/modules', data.module, 'entity');
   const isModule = fs.existsSync(dir);
   if (isModule) {
-    await createModel(table.name, dir, columns);
-    console.log(chalk.greenBright('Model created correctly in: ', dir));
+    return dir;
   }
   else {
     console.log(chalk.red('The module does not exist: ', dir));
@@ -188,5 +173,6 @@ const moduleCreate = async (connnection, database) => {
 };
 
 module.exports = {
-  moduleCreate
-};
+  createModel,
+  verifyDirEntity,
+}
