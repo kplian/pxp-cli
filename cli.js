@@ -5,21 +5,27 @@ cliPxp.main();
 
 const cli = meow(`
 	Usage
-	  $ cli-pxp
+	  $ pxp
 
 	Options
-	  --entity,     -e  Generate model pxp-nd from database
-	  --newEntity, -ne  Generate new entity file
-	  --controller, -c  Generate controller pxp-nd
-	  --relation,   -r  Generate model relations pxp-nd
-    --grid,       -g  Generate Grid for pxp-ui
-    --form,       -f  Generate Form for pxp-ui
+	  --newBackend,  -b  Generate new backend project pxp-nd 
+	  --entity,      -e  Generate model pxp-nd from database
+	  --newEntity,   -n  Generate new entity file
+	  --controller,  -c  Generate controller pxp-nd
+	  --relation,    -r  Generate model relations pxp-nd
+    --grid,        -g  Generate Grid for pxp-ui
+    --form,        -f  Generate Form for pxp-ui
 
 	Examples
-	  $ cli-pxp --entity
+	  $ pxp --entity
 `, {
   booleanDefault: undefined,
   flags: {
+    newBackend: {
+      type: 'boolean',
+      default: false,
+      alias: 'nd'
+    },
     entity: {
       type: 'boolean',
       default: false,
@@ -53,8 +59,10 @@ const cli = meow(`
   }
 });
 
+const args = process.argv.slice(2);
 
 switch (true) {
+  case cli.flags.newBackend: cliPxp.createBackend(args); break;
   case cli.flags.newEntity: cliPxp.entityMain(); break;
   case cli.flags.entity: cliPxp.modelGenerate(); break;
   case cli.flags.grid: cliPxp.generateGridForm(); break;

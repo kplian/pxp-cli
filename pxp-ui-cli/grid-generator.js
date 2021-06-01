@@ -176,6 +176,7 @@ const generateGridForm = async (isFrom = false) => {
   await writeGrid(entity, isFrom, columns);
   const aux = isFrom ? 'Form' : 'Grid';
   console.log(chalk.greenBright(aux + ' Ui created correctly in: ', path.join(process.env.USERPROFILE, 'Downloads', entity + aux + '.js')));
+  process.exit();
 };
 
 module.exports = {

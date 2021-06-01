@@ -1,7 +1,8 @@
 const { moduleCreate } = require('./pxp-nd-cli/model-generator');
-const { main: entityMain } = require('./pxp-nd-cli/entitny-generator');
+const { main: entityMain } = require('./pxp-nd-cli/entity-generator');
 const { connect } = require('./pxp-nd-cli/typeorm-connect');
 const { generateGridForm } = require('./pxp-ui-cli/grid-generator');
+const { main: createBackend } = require('./pxp-nd-cli/new-project-create');
 
 const chalk = require('chalk');
 const figlet = require('figlet');
@@ -23,4 +24,5 @@ module.exports = {
   modelGenerate,
   entityMain,
   generateGridForm,
+  createBackend,
 }
