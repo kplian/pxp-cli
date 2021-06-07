@@ -15,6 +15,7 @@ const cli = meow(`
 	  --relation,    -r  Generate model relations pxp-nd
     --grid,        -g  Generate Grid for pxp-ui
     --form,        -f  Generate Form for pxp-ui
+    --version,     -v  Current version for pxp-cli
 
 	Examples
 	  $ pxp --entity
@@ -56,10 +57,20 @@ const cli = meow(`
       default: false,
       alias: 'f'
     },
+    version: {
+      type: 'boolean',
+      default: false,
+      alias: 'v'
+    },
   }
 });
 
 const args = process.argv.slice(2);
+
+const getVersion = () => {
+  const package = require('./package.json');
+  console.log(package.version);
+};
 
 switch (true) {
   case cli.flags.newBackend: cliPxp.createBackend(args); break;
@@ -67,5 +78,6 @@ switch (true) {
   case cli.flags.entity: cliPxp.modelGenerate(); break;
   case cli.flags.grid: cliPxp.generateGridForm(); break;
   case cli.flags.form: cliPxp.generateGridForm(true); break;
+  case cli.flags.version: getVersion(); break;
   default: console.log('Option in development...!!!', ' pxp version 1.1.1');
 }
