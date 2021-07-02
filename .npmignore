@@ -1,3 +1,4 @@
-ormconfig.json
+# ormconfig.json
 src/
 dist/
+pxp-nd-cli/base/.git/

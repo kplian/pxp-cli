@@ -19,6 +19,25 @@ const getPathEntity = (entity) => {
   return response;
 };
 
+const getModules = () => {
+  const dir = path.join(process.cwd(), 'src/modules');
+  const modules = fs.readdirSync(dir);
+
+  return modules.filter(mod => fs.lstatSync(dir + '/' + mod).isDirectory());
+}
+
+const getEntitiesModule = (module) => {
+  const dir = path.join(process.cwd(), 'src/modules', module, 'entity');
+
+  if(fs.existsSync(dir)) {
+    const entities = fs.readdirSync(dir);
+    return entities.filter(e => e.endsWith('.ts')).map(e=>e.substring(0, e.length - 3));
+  } else {
+    console.log('Error: Folder entity no exist.');
+    return [];
+  }
+}
+
 const getEntities = (connection) => _.map(connection.entityMetadatas, item => item.name);
 
 const getColumns = (entityName, connection) => {
@@ -38,4 +57,6 @@ module.exports = {
   getColumns,
   getEntities,
   getPathEntity,
+  getModules,
+  getEntitiesModule,
 };

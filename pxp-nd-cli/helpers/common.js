@@ -4,12 +4,12 @@ const fs = require('fs');
 const path = require('path');
 const _ = require('lodash');
 
-const promptReplace = async () => {
+const promptReplace = async (name) => {
   const rpcl = await prompts([
     {
       type: 'toggle',
       name: 'replace',
-      message: 'The entity already exists. Do you want to replace the file?',
+      message: 'The ' + name + ' already exists. Do you want to replace the file?',
       initial: false,
       active: 'yes',
       inactive: 'no'
@@ -29,7 +29,6 @@ const writeColumnsEntity = (stream, columns) => {
     }
     else {
       const keysCol = Object.keys(_.omit(column, ['isId']));
-      console.log('[keysCol]', keysCol);
       stream.write("\t@Column({" +
         keysCol.map((keyCol, i) => " " + keyCol + ": " + colNameRender(column[keyCol])) +
         " })" +
@@ -77,7 +76,7 @@ const writeColumns = (stream, columns) => {
     return name === false || name === true || !isNaN(name) ? name : "'" + name + "'";
   };
   const keys = Object.keys(columns);
-  console.log('[cols]', columns);
+
   keys.forEach(key => {
     const col = _.omitBy(columns[key], _.isNull);
     const keysCol = Object.keys(col);
@@ -109,15 +108,20 @@ const createModel = async (model, dir, columns = {}, isPxpEntity = false, isEnti
         stream.write("\tOneToMany,\n");
         stream.write("\tJoinColumn,\n");
         stream.write("\tManyToOne,\n");
-        stream.write("\tBaseEntity,\n");
+        // stream.write("\tBaseEntity,\n");
         stream.write("\tEntity,\n");
         stream.write("\tPrimaryGeneratedColumn,\n");
         stream.write("\tColumn\n");
         stream.write("} from 'typeorm';\n");
+        
+        if (isPxpEntity) {
+          stream.write("import { PxpEntity } from '@pxp-nd/entities';\n");
+        }
+
         stream.write("\n");
         stream.write("@Entity({ name: '" + _.snakeCase(model) + "' })\n");
         if (isPxpEntity) {
-          stream.write("export default class " + modelOrm + " extends BaseEntity {\n");
+          stream.write("export default class " + modelOrm + " extends PxpEntity {\n");
         } else {
           stream.write("export default class " + modelOrm + " {\n");
         }
@@ -134,7 +138,7 @@ const createModel = async (model, dir, columns = {}, isPxpEntity = false, isEnti
   }
 
   if (fs.existsSync(fileDir)) {
-    const replace = await promptReplace();
+    const replace = await promptReplace('entity');
     if (replace) {
       await write();
       console.log(chalk.greenBright('Model created correctly in: ', dir));
@@ -172,7 +176,67 @@ const verifyDirEntity = async () => {
   }
 };
 
+
+const especialWords = {
+  photo: 'photos',
+  piano: 'pianos',
+  zoo: 'zoos',
+  chef: 'chefs',
+  roof: 'roofs',
+  child: 'children',
+  woman: 'women',
+  person: 'people',
+  foot: 'feet',
+  mouse: 'mice',
+  tooth: 'teeth',
+  man: 'men',
+  goose: 'geese',
+  ox: 'oxen',
+  deer: 'deer',
+  sheep: 'sheep',
+  fish: 'fish',
+  means: 'means',
+  species: 'species',
+  series: 'series',
+  ice: 'ice',
+};
+
+function pluralize(string) {
+  if (especialWords.hasOwnProperty(string)){
+    return especialWords[string];
+  }
+
+  if (string.endsWith('ay') || string.endsWith('ey') || string.endsWith('oy')) {
+    return string + 's';
+  }
+
+  if (string.endsWith('y')) {
+    return string.substring(0, string.length - 1) + 'ies';
+  }
+
+  if (string.endsWith('s') || string.endsWith('z') || string.endsWith('x') || string.endsWith('ch') || string.endsWith('sh')) {
+    return string + 'es';
+  }
+
+  if (string.endsWith('fe') || string.endsWith('f')) {
+    const length = string.endsWith('f') ? 1 : 2;
+    return string.substring(0, string.length - length) + 'ves';
+  }
+  
+  if (string.endsWith('o')) {
+    return string + 'es';
+  }
+
+  if (string.endsWith('ff')) {
+    return string + 's';
+  }
+
+  return string + 's';
+}
+
 module.exports = {
   createModel,
   verifyDirEntity,
+  pluralize,
+  promptReplace,
 }

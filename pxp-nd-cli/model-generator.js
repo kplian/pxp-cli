@@ -5,7 +5,6 @@ const fs = require('fs');
 const _ = require('lodash');
 const { createModel, verifyDirEntity } = require('./helpers/common');
 const { getSchemaDatabase, getSchemaColumns, getNamesPropertiesColumn } = require('./helpers/db-settings');
-const { type } = require('os');
 
 const promptTable = async (connection, database, type) => {
   const query = getSchemaDatabase(type);
@@ -30,7 +29,6 @@ const columnsBuilder = async (connection, database, table, type) => {
   const names = getNamesPropertiesColumn(type);
   const columnsBuild = {};
 
-  console.log('[Ccolsss]', columns);
   columns.forEach((column) => {
     const nameOrm = _.camelCase(column[names.name]);
     columnsBuild[nameOrm] = {

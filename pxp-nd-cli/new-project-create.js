@@ -2,39 +2,49 @@ const shell = require('shelljs');
 const chalk = require('chalk');
 const Listr = require('listr');
 const path = require('path');
+const fse = require('fs-extra');
 
 const tasks = (projectDirectory) => new Listr([
-	{
-    title: 'Checking git',
-    task: () => 
-    {
-      if (!shell.which('git')) {
-        shell.echo('Sorry, git is needed to create the application.');
-        shell.exit(1);
-      }            
-      // if (result !== '') {
-      // 	throw new Error('Unclean working tree. Commit or stash changes first.');
-      // }
-    }
-  },
+	// {
+  //   title: 'Checking git',
+  //   task: () => 
+  //   {
+  //     if (!shell.which('git')) {
+  //       shell.echo('Sorry, git is needed to create the application.');
+  //       shell.exit(1);
+  //     }            
+  //     // if (result !== '') {
+  //     // 	throw new Error('Unclean working tree. Commit or stash changes first.');
+  //     // }
+  //   }
+  // },
   {
-    title: 'Clone pxp-nd-base project',
+    title: 'Generate pxp-nd-base project',
     task: () => {
-      return new Promise((resolve, reject)=>{
-        shell.exec('git clone git@github.com:kplian/pxp-nd-base.git ' + projectDirectory, ()=>{
-          // shell.mv('pxp-nd-base/', 'new-backend/');
-          shell.cd(projectDirectory);
-          shell.rm('-rf', '.git/');
-          resolve(true);
+      // return new Promise((resolve, reject)=>{
+      //   shell.exec('git clone git@github.com:kplian/pxp-nd-base.git ' + projectDirectory, ()=>{
+      //     // shell.mv('pxp-nd-base/', 'new-backend/');
+      //     shell.cd(projectDirectory);
+      //     shell.rm('-rf', '.git/');
+      //     resolve(true);
+      //   });
+      // });
+      return new Promise((resolve, reject) => {
+        fse.copy(path.join(__dirname, '/base'), path.join(process.cwd(), projectDirectory), { recursive: true } ,function (err) {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(true);
+          }
         });
       });
-      
     },
   },
 	{
 		title: 'Install package dependencies with npm',
 		task: () => {
       return new Promise((resolve, reject) => {
+        shell.cd(projectDirectory);
         shell.exec('npm i', ()=>{
           resolve(true);
         });
@@ -67,7 +77,6 @@ const successCreate = (projectDirectory, directory) => {
 };
 
 const main = (args) => {
-  console.log(args);
   const projectDirectory = args[1] || null;
   
   if(!projectDirectory) {
