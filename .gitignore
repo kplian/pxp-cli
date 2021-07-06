@@ -3,3 +3,4 @@ ormconfig.json
 src/
 dist/
 pxp-nd-cli/base/
+pxp-ui-cli/base/

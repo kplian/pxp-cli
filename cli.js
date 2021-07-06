@@ -8,7 +8,8 @@ const cli = meow(`
 	  $ pxp
 
 	Options
-	  --newBackend,  -b  Generate new backend project pxp-nd 
+	  --newBackend,  -b  Generate new backend project pxp-nd
+    --newUi,       -u  Generate new UI project pxp-ui
 	  --entity,      -e  Generate model pxp-nd from database
 	  --newEntity,   -n  Generate new entity file
 	  --controller,  -c  Generate controller pxp-nd
@@ -25,7 +26,12 @@ const cli = meow(`
     newBackend: {
       type: 'boolean',
       default: false,
-      alias: 'nd'
+      alias: 'b'
+    },
+    newUi: {
+      type: 'boolean',
+      default: false,
+      alias: 'u'
     },
     entity: {
       type: 'boolean',
@@ -74,11 +80,12 @@ const getVersion = () => {
 
 switch (true) {
   case cli.flags.newBackend: cliPxp.createBackend(args); break;
+  case cli.flags.newUi: cliPxp.mainCreateProjectUI(args); break;
   case cli.flags.newEntity: cliPxp.entityMain(); break;
   case cli.flags.entity: cliPxp.modelGenerate(); break;
   case cli.flags.grid: cliPxp.generateGridForm(); break;
   case cli.flags.form: cliPxp.generateGridForm(true); break;
   case cli.flags.controller: cliPxp.mainController(); break;
   case cli.flags.version: getVersion(); break;
-  default: console.log('Option in development...!!!', ' pxp version 1.1.1');
+  default: console.log('Option in development...!!!');
 }

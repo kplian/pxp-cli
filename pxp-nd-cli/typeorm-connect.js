@@ -1,5 +1,6 @@
 const prompts = require('prompts');
 const path = require('path');
+const fs = require('fs');
 const _ = require('lodash');
 const { createConnections, getConnection } = require('typeorm');
 const chalk = require('chalk');
@@ -19,7 +20,17 @@ const promptData = async (connections = []) => await prompts([
 const connect = async () => {
   try {
     let options;
-    options = require(path.join(process.cwd(), 'ormconfig.json'));
+    pathOrmJson = path.join(process.cwd(), 'ormconfig.json');
+    pathOrmJs = path.join(process.cwd(), 'ormconfig.js');
+
+    if (fs.existsSync(pathOrmJson)) {
+      options = require(pathOrmJson);
+    } else if (fs.existsSync(pathOrmJs)) {
+      options = require(pathOrmJs);
+    } else {
+      console.log(chalk.red('Error: Configuration file for typeOrm not found.'));
+      process.exit(1);
+    }
     const connections = await createConnections(options);
     const db = await promptData(connections);
 

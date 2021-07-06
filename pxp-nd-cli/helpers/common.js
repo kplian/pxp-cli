@@ -112,6 +112,9 @@ const createModel = async (model, dir, columns = {}, isPxpEntity = false, isEnti
         stream.write("\tEntity,\n");
         stream.write("\tPrimaryGeneratedColumn,\n");
         stream.write("\tColumn\n");
+        if (!isPxpEntity) {
+          stream.write("\tBaseEntity\n");
+        }
         stream.write("} from 'typeorm';\n");
         
         if (isPxpEntity) {
@@ -123,7 +126,7 @@ const createModel = async (model, dir, columns = {}, isPxpEntity = false, isEnti
         if (isPxpEntity) {
           stream.write("export default class " + modelOrm + " extends PxpEntity {\n");
         } else {
-          stream.write("export default class " + modelOrm + " {\n");
+          stream.write("export default class " + modelOrm + " extends BaseEntity {\n");
         }
         if (!isEntity) {
           writeColumns(stream, columns);
