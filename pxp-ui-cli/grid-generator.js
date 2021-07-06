@@ -53,9 +53,9 @@ const writeGrid = async (entity, isFrom, columns) => {
       stream.write("import React from 'react';\n");
       stream.write("import * as Yup from 'yup';\n");
       if (isFrom) {
-        stream.write("import Form from '../../../_pxp/components/Form/Form';\n\n");
+        stream.write("import Form from '@pxp-ui/components/Form/Form';\n\n");
       } else {
-        stream.write("import TablePxp from '../../../_pxp/components/Table/TablePxp';\n\n");
+        stream.write("import TablePxp from '@pxp-ui/components/Table/TablePxp';\n\n");
       }
       stream.write("const " + nameRender + " = () => {\n");
       stream.write("\tconst json" + nameFile + ' = {\n');
