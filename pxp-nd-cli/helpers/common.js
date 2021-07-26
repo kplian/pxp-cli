@@ -19,6 +19,22 @@ const promptReplace = async (name) => {
 };
 
 const writeColumnsEntity = (stream, columns) => {
+  const renderTypeInv = (type) => {
+    switch (type) {
+      case 'number':
+        return 'integer';
+      case 'Date':
+        return 'date';
+      case 'string':
+        return 'varchar';
+      case 'boolean':
+        return 'tinyint';
+      case 'array':
+        return 'varchar';
+      default:
+        return type;
+    };
+  };
   const colNameRender = (name) => {
     return name === false || name === true || !isNaN(name) ? name : "'" + _.snakeCase(name) + "'";
   };
@@ -30,7 +46,11 @@ const writeColumnsEntity = (stream, columns) => {
     else {
       const keysCol = Object.keys(_.omit(column, ['isId']));
       stream.write("\t@Column({" +
-        keysCol.map((keyCol, i) => " " + keyCol + ": " + colNameRender(column[keyCol])) +
+        keysCol.map((keyCol, i) => {
+          if (keyCol === 'type') {
+            return " " + keyCol + ": '" + renderTypeInv(column[keyCol]) + "'";
+          }
+          return " " + keyCol + ": " + colNameRender(column[keyCol])}) +
         " })" +
         "\n");
     }
@@ -69,9 +89,9 @@ const writeColumns = (stream, columns) => {
         return 'string';
       default:
         return type;
-    }
-    ;
+    };
   };
+
   const colNameRender = (name) => {
     return name === false || name === true || !isNaN(name) ? name : "'" + name + "'";
   };
@@ -86,9 +106,11 @@ const writeColumns = (stream, columns) => {
     }
     else {
       stream.write("\t@Column({" +
-        keysCol.map((keyCol, i) => " " + keyCol + ": " + colNameRender(col[keyCol])) +
-        " })" +
-        "\n");
+        keysCol.map((keyCol, i) => {
+          return " " + keyCol + ": " + colNameRender(col[keyCol])
+        })
+        + " })" + "\n"
+      );
     }
     stream.write("\t" + key + ": " + renderType(columns[key].type) + ";\n");
   });
@@ -111,9 +133,9 @@ const createModel = async (model, dir, columns = {}, isPxpEntity = false, isEnti
         // stream.write("\tBaseEntity,\n");
         stream.write("\tEntity,\n");
         stream.write("\tPrimaryGeneratedColumn,\n");
-        stream.write("\tColumn\n");
+        stream.write("\tColumn,\n");
         if (!isPxpEntity) {
-          stream.write("\tBaseEntity\n");
+          stream.write("\tBaseEntity,\n");
         }
         stream.write("} from 'typeorm';\n");
         
