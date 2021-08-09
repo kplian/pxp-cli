@@ -30,6 +30,17 @@ const tasks = (projectDirectory) => new Listr([
       });
     }
 	},
+  {
+    title: 'Install package @pxp-ui',
+    task: () => {
+      return new Promise((resolve, reject) => {
+        shell.cd(projectDirectory);
+        shell.exec('npm i @pxp-ui/core @pxp-ui/components @pxp-ui/hooks @pxp-ui/themes --legacy-peer-deps', () => {
+          resolve(true);
+        });
+      });
+    }
+  },
 ]);
 
 const successCreate = (projectDirectory, directory) => {

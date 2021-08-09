@@ -51,6 +51,17 @@ const tasks = (projectDirectory) => new Listr([
       });
     }
 	},
+  {
+		title: 'Install @pxp-nd/core',
+		task: () => {
+      return new Promise((resolve, reject) => {
+        shell.cd(projectDirectory);
+        shell.exec('npm i @pxp-nd/core', ()=>{
+          resolve(true);
+        });
+      });
+    }
+	},
 ]);
 
 const successCreate = (projectDirectory, directory) => {

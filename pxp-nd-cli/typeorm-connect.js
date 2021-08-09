@@ -31,6 +31,11 @@ const connect = async () => {
       console.log(chalk.red('Error: Configuration file for typeOrm not found.'));
       process.exit(1);
     }
+
+    if(!Array.isArray(options)) {
+      options = [options];
+    }
+
     const connections = await createConnections(options);
     const db = await promptData(connections);
 
