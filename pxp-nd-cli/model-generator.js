@@ -3,6 +3,7 @@ const chalk = require('chalk');
 const path = require('path');
 const fs = require('fs');
 const _ = require('lodash');
+const { connect } = require('./typeorm-connect');
 const { createModel, verifyDirEntity } = require('./helpers/common');
 const { getSchemaDatabase, getSchemaColumns, getNamesPropertiesColumn } = require('./helpers/db-settings');
 
@@ -46,7 +47,7 @@ const moduleCreate = async (connection, database, type) => {
 
   const table = await promptTable(connection, database, type);
   if (!table.name) {
-    console.log(chalk.yellowBright('Thanks for using PXP-GENERATOR...!!!'));
+    console.log(chalk.yellowBright('Thanks for using PXP-CLI...!!!'));
     process.exit();
   }
 
@@ -55,6 +56,13 @@ const moduleCreate = async (connection, database, type) => {
   await createModel(table.name, dir, columns);
 };
 
+async function modelGenerate() {
+  const { connection, database, type } = await connect();
+  await moduleCreate(connection, database, type);
+  console.log(chalk.yellowBright('Thanks for using PXP-CLI...!!!'));
+  process.exit();
+}
+
 module.exports = {
-  moduleCreate
+  modelGenerate,
 };

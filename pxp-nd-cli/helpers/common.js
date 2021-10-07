@@ -187,8 +187,7 @@ const verifyDirEntity = async () => {
   ]);
 
   if (!data.module) {
-    console.log(chalk.yellowBright('Thanks for using PXP-GENERATOR...!!!'));
-    process.exit();
+    throw new Error(null);
   }
 
   const dir = path.join(process.cwd(), 'src/modules', data.module, 'entity');

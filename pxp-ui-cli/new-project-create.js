@@ -3,26 +3,33 @@ const chalk = require('chalk');
 const Listr = require('listr');
 const path = require('path');
 const fse = require('fs-extra');
+const { extractFile } = require('../extract-zip');
 
 const tasks = (projectDirectory) => new Listr([
   {
     title: 'Generate pxp-ui-base project',
     task: () => {
       return new Promise((resolve, reject) => {
-        fse.copy(path.join(__dirname, '/base'), path.join(process.cwd(), projectDirectory), { recursive: true } ,function (err) {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(true);
-          }
+        shell.exec('curl -L -O https://github.com/kplian/pxp-ui-base/archive/refs/heads/main.zip', function () {
+          resolve(true);
         });
       });
     },
+  },
+  {
+    title: 'Copy files project',
+    task: () => {
+      return new Promise((resolve, reject) => {
+        extractFile(path.join(process.cwd(), 'main.zip')).then(() => resolve(true));
+      });
+    }
   },
 	{
 		title: 'Install package dependencies with npm',
 		task: () => {
       return new Promise((resolve, reject) => {
+        shell.mv('pxp-ui-base-main', projectDirectory)
+        shell.rm('-rf', 'main.zip')
         shell.cd(projectDirectory);
         shell.exec('npm i --legacy-peer-deps', ()=>{
           resolve(true);

@@ -53,10 +53,16 @@ const getColumns = (entityName, connection) => {
   return columns.filter(item => !_.includes(['createdBy', 'userIdAi', 'userAi', 'modifiedBy', 'createdAt', 'modifiedAt'], item.name));
 };
 
+const t = (num) => {
+  if( num <=0 ) return '';
+  else return '\t' + t(num-1);
+};
+
 module.exports = {
   getColumns,
   getEntities,
   getPathEntity,
   getModules,
   getEntitiesModule,
+  t,
 };
