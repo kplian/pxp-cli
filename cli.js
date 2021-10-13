@@ -94,7 +94,7 @@ try {
     case cli.flags.grid: cliPxp.generateGridForm(); break;
     case cli.flags.form: cliPxp.generateGridForm(true); break;
     case cli.flags.controller: cliPxp.mainController(); break;
-    case cli.flags.module: cliPxp.mainCreateModule(); break;
+    case cli.flags.uiModule: cliPxp.mainCreateModule(); break;
     case cli.flags.version: getVersion(); break;
     default: console.log('Option in development...!!!');
   }
