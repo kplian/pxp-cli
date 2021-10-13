@@ -65,7 +65,7 @@ const cli = meow(`
       default: false,
       alias: 'f'
     },
-    module: {
+    uiModule: {
       type: 'boolean',
       default: false,
       alias: 'm'
