@@ -84,7 +84,7 @@ const getVersion = () => {
   const package = require('./package.json');
   console.log(package.version);
 };
-
+console.log('aqui');
 try {
   switch (true) {
     case cli.flags.newBackend: cliPxp.createBackend(args); break;

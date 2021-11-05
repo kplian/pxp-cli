@@ -7,14 +7,19 @@ const getPathEntity = (entity) => {
   const modules = fs.readdirSync(dir);
   let response = { error: true };
   modules.forEach(file => {
-    const files = fs.readdirSync(path.join(dir, file, 'entity'));
-    const exist = _.indexOf(files, entity + '.ts') >= 0;
-    if (exist) {
-      response = {
-        path: path.join(dir, file, 'entity'),
-        module: file,
-      };
+    if(file!='.DS_Store'){
+      const pathFile = path.join(dir, file, 'entity');
+      console.log('test hoy', pathFile, file);
+      const files = fs.readdirSync(pathFile);
+      const exist = _.indexOf(files, entity + '.ts') >= 0;
+      if (exist) {
+        response = {
+          path: pathFile,
+          module: file,
+        };
+      }  
     }
+    
   });
   return response;
 };

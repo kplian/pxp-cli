@@ -42,7 +42,8 @@ const writeColumns = (columns, stream) => {
 const writeGrid = async (entity, isFrom, columns) => {
   const nameFile = _.capitalize(entity);
   const nameRender = nameFile + (isFrom ? 'Form' : 'Grid');
-  const fileDir = path.join(process.env.USERPROFILE, 'Downloads', nameRender + '.tsx');
+  console.log('cli',process.env.USERPROFILE,process.env.HOME);
+  const fileDir = path.join(process.env.USERPROFILE ? process.env.USERPROFILE : process.env.HOME, 'Downloads', nameRender + '.tsx');
   const primaryCol = _.find(columns, { isPrimary: true });
   const stream = fs.createWriteStream(fileDir);
   const pathEntity = getPathEntity(entity);
@@ -182,6 +183,7 @@ const promptColumns = async (entity, connection) => {
 
 const promptEntity = async (connection) => {
   const entities = getEntities(connection);
+  console.log('cli', entities);
   const resp = await prompts([
     {
       type: 'autocomplete',
@@ -205,13 +207,13 @@ const generateGridForm = async (isFrom = false) => {
   // getEntities(connection);
   const entity = await promptEntity(connection);
   const columns = await promptColumns(entity, connection);
-  // console.log('[colss]', columns);
+  console.log('[colss]', columns);
   await writeGrid(entity, isFrom, columns);
   const aux = isFrom ? 'Form' : 'Grid';
-  console.log(chalk.greenBright(aux + ' Ui created correctly in: ', path.join(process.env.USERPROFILE, 'Downloads', entity + aux + '.tsx')));
+  console.log(chalk.greenBright(aux + ' Ui created correctly in: ', path.join(process.env.USERPROFILE ? process.env.USERPROFILE : process.env.HOME, 'Downloads', entity + aux + '.tsx')));
   process.exit();
 };
 
 module.exports = {
   generateGridForm,
-}
+};
